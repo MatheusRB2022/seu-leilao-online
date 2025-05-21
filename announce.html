@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Anunciar Produto - Seu Leilão Online</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        .announce-form {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 100px auto 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        button[type="submit"]:hover {
+            background-color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo flex items-center gap-2">
+                    <a href="/" class="flex items-center gap-2">
+                        <img src="/public/logo.svg" alt="Seu Leilão Logo" class="h-10 w-auto" />
+                        <span class="logo-text">SEU LEILÃO ONLINE</span>
+                    </a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-links">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/login.html">Login</a></li>
+                    <li><a href="/register.html">Registrar</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="announce-form">
+            <h1>Anunciar Produto</h1>
+            <form id="announceForm">
+                <div class="form-group">
+                    <label for="title">Título do Produto</label>
+                    <input type="text" id="title" name="title" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Descrição</label>
+                    <textarea id="description" name="description" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">Categoria</label>
+                    <select id="category" name="category" required>
+                        <!-- Categories will be loaded dynamically -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="starting_price">Preço Inicial (R$)</label>
+                    <input type="number" id="starting_price" name="starting_price" min="0" step="0.01" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="end_time">Data de Encerramento</label>
+                    <input type="datetime-local" id="end_time" name="end_time" required />
+                </div>
+                
+                <button type="submit" id="submitButton">Anunciar Produto</button>
+            </form>
+        </div>
+    </main>
+    <script>
+        // Set minimum datetime-local to current time
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('end_time').min = now.toISOString().slice(0, 16);
+        
+        // Load categories
+        fetch('http://localhost:3001/api/categories')
+            .then(response => response.json())
+            .then(categories => {
+                const select = document.getElementById('category');
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.slug;
+                    option.textContent = cat.name;
+                    select.appendChild(option);
+                });
+            })
+            .catch(console.error);
+        
+        // Handle form submission
+        document.getElementById('announceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const button = document.getElementById('submitButton');
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                button.disabled = true;
+                button.textContent = 'Anunciando...';
+                
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                const response = await fetch('http://localhost:3001/api/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('Produto anunciado com sucesso!');
+                    window.location.href = '/';
+                } else {
+                    const error = await response.json();
+                    alert(error.error || 'Erro ao anunciar produto');
+                }
+            } catch (error) {
+                alert('Erro ao conectar com o servidor');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Anunciar Produto';
+            }
+        });
+    </script>
+</body>
+</html>
