@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seu Leilão Online</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .sidebar {
+            position: fixed;
+            left: -300px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: left 0.3s ease;
+            z-index: 1000;
+            padding: 80px 20px 20px;
+        }
+        
+        .sidebar.active {
+            left: 0;
+        }
+        
+        .hamburger-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+            padding: 10px;
+            z-index: 1001;
+        }
+        
+        .hamburger-menu span {
+            display: block;
+            width: 25px;
+            height: 2px;
+            background: var(--primary-color);
+        }
+        
+        .category-item {
+            display: block;
+            padding: 12px;
+            color: var(--text-color);
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .category-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .product-info h3 {
+            margin: 0 0 10px;
+            color: var(--text-color);
+        }
+        
+        .product-price {
+            margin: 15px 0;
+            font-size: 1.2em;
+        }
+        
+        .product-timer {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        
+        .bid-button {
+            width: 100%;
+            padding: 10px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .bid-button:hover {
+            background: var(--secondary-color);
+        }
+        
+        .bid-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .bid-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+        }
+        
+        .bid-modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .bid-modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .announce-product {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 30px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .announce-product:hover {
+            transform: translateY(-2px);
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-categories">
+            <!-- Categories will be loaded here -->
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo flex items-center gap-2">
+                    <a href="/" class="flex items-center gap-2">
+                        <img src="/public/logo.svg" alt="Seu Leilão Logo" class="h-10 w-auto" />
+                        <span class="logo-text">SEU LEILÃO ONLINE</span>
+                    </a>
+                </div>
+                
+                <button class="hamburger-menu" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <ul class="nav-links">
+                    <li><a href="#destaques">Destaques</a></li>
+                    <li><a href="#agenda">Agenda de Leilões</a></li>
+                    <li><a href="#leilao-online">Leilão Online</a></li>
+                    <li><a href="#atendimento">Atendimento</a></li>
+                    <li class="nav-live"><a href="#ao-vivo">Ao vivo</a></li>
+                    <li class="nav-user"><a href="/login.html"><i class="fas fa-user"></i></a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" style="margin-bottom: 40px;">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Leilões Online</h1>
+                <p>Participe e Arremate! Encontre as melhores oportunidades em leilões.</p>
+                <a href="#participar" class="btn btn-primary">Como Participar</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Grid -->
+    <section class="products-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Leilões em Andamento</h2>
+            </div>
+            <div class="products-grid">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Leilão Online Info Section -->
+    <section id="leilao-online" class="section-info">
+        <div class="container">
+            <h2>Leilão Online</h2>
+            <div class="info-content">
+                <p>Você já considerou participar de um leilão online? Essa modalidade de compra tem se tornado cada vez mais popular e se assemelha a outras formas de comércio digital.</p>
+                
+                <h3>Como funcionam os leilões online?</h3>
+                <p>Os leilões online funcionam basicamente da mesma forma que os presenciais. Ganha quem dá o maior lance para o produto ofertado, desde que supere o valor estipulado pelo vendedor. Na prática, é simples!</p>
+                
+                <h3>Leilão online é confiável?</h3>
+                <p>Sim, o leilão online é confiável. No entanto, é preciso estar atento a alguns detalhes antes de participar de qualquer um deles, garantindo a sua integridade.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Atendimento Section -->
+    <section id="atendimento" class="section-atendimento">
+        <div class="container">
+            <h2>Atendimento</h2>
+            <div class="atendimento-grid">
+                <div class="atendimento-card">
+                    <i class="fab fa-whatsapp"></i>
+                    <h3>WhatsApp</h3>
+                    <p>(11) 97612-3333</p>
+                </div>
+                
+                <div class="atendimento-card">
+                    <i class="fas fa-phone"></i>
+                    <h3>Telefone</h3>
+                    <p>(11) 97612-3333</p>
+                </div>
+
+                <div class="atendimento-card">
+                    <i class="fas fa-envelope"></i>
+                    <h3>Email</h3>
+                    <p>sac@seuleilao.com</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Receba novidades</h3>
+                    <form class="newsletter-form">
+                        <input type="text" placeholder="Nome *" required>
+                        <input type="email" placeholder="Email *" required>
+                        <select required>
+                            <option value="">Selecione a categoria</option>
+                            <option value="veiculos">Veículos</option>
+                            <option value="imoveis">Imóveis</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    </form>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Redes Sociais</h3>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/m4theusrb/" target="_blank"><i class="fab fa-facebook"></i></a>
+                        <a href="https://www.instagram.com/m4theusrb/" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.instagram.com/m4theusrb/" target="_blank"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Announce Product Button -->
+    <a href="/announce.html" class="announce-product hidden">
+        Anunciar Produto
+    </a>
+
+    <!-- Custom JS -->
+    <script src="js/script.js"></script>
+    <script src="js/auction.js"></script>
+</body>
+</html>
